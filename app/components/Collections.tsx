@@ -11,8 +11,8 @@ interface Collection {
   id: string;
   name: string;
   description: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 async function createCollection(data: { name: string; description?: string }) {

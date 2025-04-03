@@ -13,7 +13,16 @@ export async function GET(): Promise<NextResponse<ApiResponse<unknown>>> {
     const collections = await prisma.collection.findMany({
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json({ data: collections });
+
+    const serializedCollections = collections.map(collection => ({
+      id: collection.id,
+      name: collection.name,
+      description: collection.description,
+      createdAt: collection.createdAt.toISOString(),
+      updatedAt: collection.updatedAt.toISOString(),
+    }));
+
+    return NextResponse.json({ data: serializedCollections });
   } catch (error) {
     return handleApiError(error);
   }
@@ -27,8 +36,16 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<u
     const collection = await prisma.collection.create({
       data: validatedData,
     });
+
+    const serializedCollection = {
+      id: collection.id,
+      name: collection.name,
+      description: collection.description,
+      createdAt: collection.createdAt.toISOString(),
+      updatedAt: collection.updatedAt.toISOString(),
+    };
     
-    return NextResponse.json({ data: collection }, { status: 201 });
+    return NextResponse.json({ data: serializedCollection }, { status: 201 });
   } catch (error) {
     return handleApiError(error);
   }

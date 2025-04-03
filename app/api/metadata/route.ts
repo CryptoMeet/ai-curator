@@ -9,11 +9,11 @@ const urlSchema = z.object({
 interface Metadata {
   title: string;
   description: string;
-  image?: string;
-  type?: 'article' | 'video' | 'image' | 'other';
-  author?: string;
-  publishedAt?: string;
-  siteName?: string;
+  image: string | null;
+  type: 'article' | 'video' | 'image' | 'other';
+  author: string | null;
+  publishedAt: string | null;
+  siteName: string | null;
 }
 
 export async function POST(request: Request): Promise<NextResponse<ApiResponse<unknown>>> {
@@ -24,22 +24,23 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<u
     const response = await fetch(url);
     const html = await response.text();
 
-    // Basic metadata extraction
+    // Basic metadata extraction with null fallbacks
     const metadata: Metadata = {
       title: extractMetaContent(html, 'title') || extractOgContent(html, 'title') || '',
       description: extractMetaContent(html, 'description') || extractOgContent(html, 'description') || '',
-      image: extractOgContent(html, 'image'),
-      author: extractMetaContent(html, 'author') || extractOgContent(html, 'article:author'),
-      publishedAt: extractOgContent(html, 'article:published_time'),
-      siteName: extractOgContent(html, 'site_name'),
+      image: extractOgContent(html, 'image') || null,
+      type: 'article',
+      author: extractMetaContent(html, 'author') || extractOgContent(html, 'article:author') || null,
+      publishedAt: extractOgContent(html, 'article:published_time') || null,
+      siteName: extractOgContent(html, 'site_name') || null,
     };
 
     // Determine content type
     if (url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
       metadata.type = 'image';
-    } else if (url.match(/youtube\.com|vimeo\.com|dailymotion\.com/i)) {
+    } else if (url.match(/youtube\.com|vimeo\.com|dailymotion\.com/i) || extractOgContent(html, 'type') === 'video') {
       metadata.type = 'video';
-    } else if (extractOgContent(html, 'type') === 'article' || isLikelyArticle(html)) {
+    } else if (isLikelyArticle(html)) {
       metadata.type = 'article';
     } else {
       metadata.type = 'other';
@@ -52,22 +53,22 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<u
 }
 
 function extractMetaContent(html: string, name: string): string | undefined {
-  const match = html.match(new RegExp(`<meta[^>]*name=["']${name}["'][^>]*content=["']([^"']*)["'][^>]*>`, 'i')) ||
-                html.match(new RegExp(`<meta[^>]*content=["']([^"']*)["'][^>]*name=["']${name}["'][^>]*>`, 'i'));
-  return match?.[1];
+  const match = html.match(new RegExp(`<meta\\s+name=["']${name}["']\\s+content=["']([^"']+)["']`, 'i'));
+  return match ? match[1] : undefined;
 }
 
 function extractOgContent(html: string, property: string): string | undefined {
-  const match = html.match(new RegExp(`<meta[^>]*property=["']og:${property}["'][^>]*content=["']([^"']*)["'][^>]*>`, 'i')) ||
-                html.match(new RegExp(`<meta[^>]*content=["']([^"']*)["'][^>]*property=["']og:${property}["'][^>]*>`, 'i'));
-  return match?.[1];
+  const match = html.match(new RegExp(`<meta\\s+property=["']og:${property}["']\\s+content=["']([^"']+)["']`, 'i'));
+  return match ? match[1] : undefined;
 }
 
 function isLikelyArticle(html: string): boolean {
-  // Check for common article indicators
-  const hasArticleTag = /<article[^>]*>/i.test(html);
-  const hasLongParagraphs = (html.match(/<p[^>]*>[^<]{200,}/g) || []).length > 0;
-  const hasMultipleParagraphs = (html.match(/<p[^>]*>/g) || []).length > 3;
+  const articleIndicators = [
+    /<article[^>]*>/i,
+    /<meta\s+property=["']og:type["']\s+content=["']article["']/i,
+    /<meta\s+name=["']author["']/i,
+    /<meta\s+property=["']article:published_time["']/i
+  ];
   
-  return hasArticleTag || (hasLongParagraphs && hasMultipleParagraphs);
+  return articleIndicators.some(pattern => pattern.test(html));
 }

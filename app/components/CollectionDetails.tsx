@@ -13,10 +13,10 @@ interface Tag {
 }
 
 interface Metadata {
-  author?: string;
-  publishedAt?: string;
-  siteName?: string;
-  image?: string;
+  author: string | null;
+  publishedAt: string | null;
+  siteName: string | null;
+  image: string | null;
 }
 
 interface Item {
@@ -27,8 +27,8 @@ interface Item {
   type: 'ARTICLE' | 'VIDEO' | 'IMAGE' | 'OTHER';
   metadata: Metadata | null;
   collectionId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   tags: Tag[];
 }
 
@@ -36,8 +36,8 @@ interface Collection {
   id: string;
   name: string;
   description: string | null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 type CollectionWithItems = Collection & {
