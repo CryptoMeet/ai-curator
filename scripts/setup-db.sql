@@ -11,7 +11,7 @@ CREATE SCHEMA IF NOT EXISTS public;
 DO $$ 
 BEGIN
   IF NOT EXISTS (SELECT FROM pg_user WHERE usename = 'ai_curator_user') THEN
-    CREATE USER ai_curator_user WITH PASSWORD 'your_password_here';
+    CREATE USER ai_curator_user WITH PASSWORD '010220';
   END IF;
 END
 $$;
