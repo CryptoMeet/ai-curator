@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { debounce } from 'lodash';
 import { motion, AnimatePresence } from 'framer-motion';

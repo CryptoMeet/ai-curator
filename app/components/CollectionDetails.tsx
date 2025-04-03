@@ -1,3 +1,5 @@
+'use client';
+
 import Link from "next/link";
 import { useState, useMemo } from "react";
 import { motion, Variants } from "framer-motion";
@@ -117,7 +119,7 @@ export default function CollectionDetails({
         setCollection((prev: CollectionWithItems) => ({
           ...prev,
           items: [json.data as Item, ...prev.items]
-        }));
+        })); 
       }
 
       setError(null);
