@@ -9,7 +9,7 @@ const createItemSchema = z.object({
   url: z.string().url("Invalid URL"),
   type: z.enum(["ARTICLE", "VIDEO", "IMAGE", "OTHER"]),
   tags: z.array(z.string()),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.any().optional(),
 });
 
 export async function GET(

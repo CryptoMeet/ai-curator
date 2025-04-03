@@ -20,4 +20,12 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default {
+  ...nextConfig,
+  async rewrites() {
+    return [];
+  },
+  server: {
+    port: 4040
+  }
+};

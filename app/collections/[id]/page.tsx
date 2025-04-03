@@ -1,11 +1,18 @@
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import CollectionDetails from "@/app/components/CollectionDetails";
+import CollectionDetails from '@/app/components/CollectionDetails';
+import { prisma } from '@/lib/prisma';
+import { notFound } from 'next/navigation';
 
 interface Props {
   params: {
     id: string;
   };
+}
+
+interface ItemMetadata {
+  author?: string | null;
+  publishedAt?: string | null;
+  siteName?: string | null;
+  image?: string | null;
 }
 
 export default async function CollectionPage({ params }: Props) {
@@ -34,11 +41,15 @@ export default async function CollectionPage({ params }: Props) {
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
       metadata: item.metadata ? {
-        author: item.metadata.author || null,
-        publishedAt: item.metadata.publishedAt || null,
-        siteName: item.metadata.siteName || null,
-        image: item.metadata.image || null
-      } : null
+        author: (item.metadata as ItemMetadata).author || null,
+        publishedAt: (item.metadata as ItemMetadata).publishedAt || null,
+        siteName: (item.metadata as ItemMetadata).siteName || null,
+        image: (item.metadata as ItemMetadata).image || null
+      } : null,
+      tags: item.tags.map(tag => ({
+        id: tag.id,
+        name: tag.name
+      }))
     }))
   };
 
