@@ -14,18 +14,29 @@ const nextConfig = {
     ],
   },
   experimental: {
-    serverActions: {
-      allowedOrigins: ['localhost:4040'],
-    },
+    serverActions: true,
+    serverActionsBodySizeLimit: '2mb'
   },
-};
-
-export default {
-  ...nextConfig,
   async rewrites() {
     return [];
   },
-  server: {
-    port: 4040
-  }
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+        ],
+      },
+    ];
+  },
 };
+
+export default nextConfig;

@@ -5,6 +5,16 @@ import { debounce } from 'lodash';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ApiResponse } from '@/lib/api-utils';
 
+interface UrlMetadata {
+  title: string;
+  description: string;
+  image: string | null;
+  type: 'article' | 'video' | 'image' | 'other';
+  author: string | null;
+  publishedAt: string | null;
+  siteName: string | null;
+}
+
 interface ItemFormData {
   title: string;
   description: string;
@@ -15,12 +25,6 @@ interface ItemFormData {
 
 interface Props {
   onSubmit: (data: ItemFormData) => Promise<void>;
-}
-
-interface UrlMetadata {
-  title: string;
-  description: string;
-  image?: string;
 }
 
 export default function ItemForm({ onSubmit }: Props) {
@@ -49,8 +53,9 @@ export default function ItemForm({ onSubmit }: Props) {
         if (json.data) {
           setFormData(prev => ({
             ...prev,
-            title: prev.title || json.data?.title || '',
-            description: prev.description || json.data?.description || '',
+            title: prev.title || json.data.title || '',
+            description: prev.description || json.data.description || '',
+            type: json.data.type || 'article'
           }));
         }
       } catch (error) {

@@ -1,14 +1,19 @@
 import { ClientComponent } from './ClientComponent'
+import { toPlainObject } from '../src/utils/serialization'
 
-// Mark as server component
+interface DataType {
+  // Add your data structure here
+  [key: string]: any;
+}
+
+async function getData(): Promise<DataType> {
+  // Implement your data fetching logic here
+  return { /* your data */ };
+}
+
 export default async function ServerComponent() {
-  // Convert complex data to plain object
-  const data = await fetchData()
-
-  // Debugging log to inspect the structure of data
-  console.log('Fetched data:', data)
-
-  const plainData = JSON.parse(JSON.stringify(data))
-
+  const data = await getData()
+  const plainData = toPlainObject<Record<string, any>>(data)
+  
   return <ClientComponent data={plainData} />
 }

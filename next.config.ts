@@ -16,8 +16,15 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ['localhost:3000'],
+      allowedOrigins: ['localhost:4040'],
     },
+  },
+  async rewrites() {
+    return [];
+  },
+  // Set the correct port configuration
+  async headers() {
+    return [];
   },
 };
 

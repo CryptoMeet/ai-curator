@@ -70,7 +70,10 @@ export default function CollectionDetails({
       const response = await fetch(`/api/collections/${collection.id}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          type: data.type.toUpperCase()
+        }),
       });
 
       const json = await response.json() as ApiResponse<Item>;
@@ -80,10 +83,22 @@ export default function CollectionDetails({
       }
 
       if (json.data) {
-        setCollection((prev: CollectionWithItems) => ({
+        // Ensure all date fields are strings
+        const newItem = {
+          ...json.data,
+          createdAt: new Date(json.data.createdAt).toISOString(),
+          updatedAt: new Date(json.data.updatedAt).toISOString(),
+          tags: json.data.tags.map(tag => ({
+            ...tag,
+            createdAt: new Date(tag.createdAt).toISOString(),
+            updatedAt: new Date(tag.updatedAt).toISOString()
+          }))
+        };
+
+        setCollection(prev => ({
           ...prev,
-          items: [json.data as Item, ...prev.items]
-        })); 
+          items: [newItem, ...prev.items]
+        }));
       }
 
       setError(null);
@@ -114,7 +129,7 @@ export default function CollectionDetails({
   };
 
   const renderItemPreview = (item: Item) => {
-    const metadata: Metadata = item.metadata || {
+    const metadata = item.metadata || {
       author: null,
       publishedAt: null,
       siteName: null,
@@ -125,17 +140,17 @@ export default function CollectionDetails({
       <motion.div
         key={item.id}
         variants={itemVariants}
-        className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+        className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow p-4"
       >
         {metadata.image && (
-          <div className="relative h-40 w-full">
+          <div className="relative h-40 w-full mb-4">
             <img
               src={metadata.image}
               alt={item.title}
-              className="object-cover w-full h-full"
+              className="object-cover w-full h-full rounded"
             />
             {item.type === 'VIDEO' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded">
                 <svg
                   className="w-12 h-12 text-white"
                   fill="none"
@@ -160,8 +175,8 @@ export default function CollectionDetails({
           </div>
         )}
         
-        <div className="p-4">
-          <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="flex items-start justify-between gap-2 mb-2">
             <h3 className="font-bold flex-1">{item.title}</h3>
             <span className="text-lg flex-shrink-0" title={item.type.toLowerCase()}>
               {getItemTypeIcon(item.type)}
@@ -278,7 +293,7 @@ export default function CollectionDetails({
         variants={container}
         initial="hidden"
         animate="show"
-        key={selectedTags.join(',')} // Re-run animation when filters change
+        key={selectedTags.join(',')}
       >
         {filteredItems.map(renderItemPreview)}
       </motion.div>

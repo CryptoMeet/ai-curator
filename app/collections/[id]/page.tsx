@@ -1,7 +1,8 @@
-import CollectionDetails from '@/app/components/CollectionDetails';
 import { prisma } from '@/lib/prisma';
+import CollectionDetails from '@/app/components/CollectionDetails';
+import { Collection } from '@/lib/types';
+import { serialize } from '@/lib/api-utils';
 import { notFound } from 'next/navigation';
-import { CollectionWithItems, Metadata, Item } from '@/lib/types';
 
 interface Props {
   params: {
@@ -11,37 +12,46 @@ interface Props {
 
 export default async function CollectionPage({ params }: Props) {
   const collection = await prisma.collection.findUnique({
-    where: { id: params.id },
-    include: { 
+    where: {
+      id: params.id,
+    },
+    include: {
       items: {
         include: {
           tags: true
         }
       }
-    },
+    }
   });
 
   if (!collection) {
     notFound();
   }
 
-  const serializedCollection: CollectionWithItems = {
-    ...collection,
+  const serializedCollection: Collection = {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
     createdAt: collection.createdAt.toISOString(),
     updatedAt: collection.updatedAt.toISOString(),
     items: collection.items.map(item => ({
-      ...item,
-      type: item.type as Item['type'],
-      metadata: item.metadata as Metadata | null,
+      id: item.id,
+      title: item.title,
+      url: item.url,
+      description: item.description,
+      collectionId: item.collectionId,
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
       tags: item.tags.map(tag => ({
-        ...tag,
+        id: tag.id,
+        name: tag.name,
+        itemId: tag.itemId,
         createdAt: tag.createdAt.toISOString(),
         updatedAt: tag.updatedAt.toISOString()
       }))
     }))
   };
 
-  return <CollectionDetails collection={serializedCollection} />;
+  // Use the serialize utility instead of JSON.parse(JSON.stringify())
+  return <CollectionDetails collection={serialize(serializedCollection)} />;
 }
