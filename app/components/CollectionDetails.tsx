@@ -6,43 +6,7 @@ import { motion, Variants } from "framer-motion";
 import ItemForm from "./ItemForm";
 import { TagFilter } from "./TagFilter";
 import { ApiResponse } from "@/lib/api-utils";
-
-interface Tag {
-  id: string;
-  name: string;
-}
-
-interface Metadata {
-  author: string | null;
-  publishedAt: string | null;
-  siteName: string | null;
-  image: string | null;
-}
-
-interface Item {
-  id: string;
-  title: string;
-  description: string | null;
-  url: string;
-  type: 'ARTICLE' | 'VIDEO' | 'IMAGE' | 'OTHER';
-  metadata: Metadata | null;
-  collectionId: string;
-  createdAt: string;
-  updatedAt: string;
-  tags: Tag[];
-}
-
-interface Collection {
-  id: string;
-  name: string;
-  description: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-type CollectionWithItems = Collection & {
-  items: Item[];
-};
+import { CollectionWithItems, Item, Metadata } from "@/lib/types";
 
 interface ItemFormData {
   title: string;
@@ -150,7 +114,12 @@ export default function CollectionDetails({
   };
 
   const renderItemPreview = (item: Item) => {
-    const metadata = item.metadata || {};
+    const metadata: Metadata = item.metadata || {
+      author: null,
+      publishedAt: null,
+      siteName: null,
+      image: null
+    };
     
     return (
       <motion.div

@@ -22,7 +22,15 @@ export async function GET(
       include: { tags: true },
       orderBy: { createdAt: "desc" },
     });
-    return NextResponse.json({ data: items });
+
+    // Ensure data is serializable
+    const serializedItems = items.map(item => ({
+      ...item,
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
+    }));
+
+    return NextResponse.json({ data: serializedItems });
   } catch (error) {
     return handleApiError(error);
   }
@@ -38,7 +46,7 @@ export async function POST(
       ...json,
       type: json.type.toUpperCase(),
     });
-    
+
     const item = await prisma.item.create({
       data: {
         ...itemData,
@@ -54,8 +62,15 @@ export async function POST(
         tags: true,
       },
     });
-    
-    return NextResponse.json({ data: item }, { status: 201 });
+
+    // Ensure data is serializable
+    const serializedItem = {
+      ...item,
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
+    };
+
+    return NextResponse.json({ data: serializedItem }, { status: 201 });
   } catch (error) {
     return handleApiError(error);
   }

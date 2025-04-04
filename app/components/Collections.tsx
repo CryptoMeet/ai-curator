@@ -6,14 +6,7 @@ import { motion } from 'framer-motion';
 import CollectionForm from './CollectionForm';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ApiResponse } from '@/lib/api-utils';
-
-interface Collection {
-  id: string;
-  name: string;
-  description: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Collection } from '@/lib/types';
 
 async function createCollection(data: { name: string; description?: string }) {
   const response = await fetch('/api/collections', {

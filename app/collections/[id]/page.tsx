@@ -1,18 +1,12 @@
 import CollectionDetails from '@/app/components/CollectionDetails';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+import { CollectionWithItems, Metadata, Item } from '@/lib/types';
 
 interface Props {
   params: {
     id: string;
   };
-}
-
-interface ItemMetadata {
-  author?: string | null;
-  publishedAt?: string | null;
-  siteName?: string | null;
-  image?: string | null;
 }
 
 export default async function CollectionPage({ params }: Props) {
@@ -31,24 +25,20 @@ export default async function CollectionPage({ params }: Props) {
     notFound();
   }
 
-  // Serialize dates and ensure metadata is a plain object
-  const serializedCollection = {
+  const serializedCollection: CollectionWithItems = {
     ...collection,
     createdAt: collection.createdAt.toISOString(),
     updatedAt: collection.updatedAt.toISOString(),
     items: collection.items.map(item => ({
       ...item,
+      type: item.type as Item['type'],
+      metadata: item.metadata as Metadata | null,
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
-      metadata: item.metadata ? {
-        author: (item.metadata as ItemMetadata).author || null,
-        publishedAt: (item.metadata as ItemMetadata).publishedAt || null,
-        siteName: (item.metadata as ItemMetadata).siteName || null,
-        image: (item.metadata as ItemMetadata).image || null
-      } : null,
       tags: item.tags.map(tag => ({
-        id: tag.id,
-        name: tag.name
+        ...tag,
+        createdAt: tag.createdAt.toISOString(),
+        updatedAt: tag.updatedAt.toISOString()
       }))
     }))
   };
